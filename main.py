@@ -1,7 +1,7 @@
 import sys
 import logging
 from pathlib import Path
-import re
+
 
 from pymongo import MongoClient
 import pandas as pd
@@ -67,18 +67,43 @@ def main():
             # Add activeList="true" for rows where 'sequenz' is present (non-empty after trimming)
             seq_val = r.get('sequenz')
             if isinstance(seq_val, str):
-                if seq_val.strip():
-                    r['activeList'] = 'true'
-            elif seq_val:
                 r['activeList'] = 'true'
+                r['activeEngine'] = 'true'
+                r['activeBayFCB_1'] = 'false'
+                r['activeBayFCB_2'] = 'false'
+                r['activeBayRearAxle'] = 'false'
+                r['activeBayThreshingFront'] = 'false'
+                r['activeBayThreshing'] = 'false'
+                r['activeBayFrontAxle'] = 'false'
+                r['activeBay_2'] = 'false'
+                r['activeBay_3'] = 'false'
+                r['activeBay_4'] = 'false'
+                r['activeBay_5'] = 'false'
+                r['activeBay_6'] = 'false'
+                r['activeBay_7'] = 'false'
+                r['activeBay_8'] = 'false'
+                r['activeBay_9'] = 'false'
+                r['activeBay_10'] = 'false'
+                r['activeTestBay_1'] = 'false'
+                r['activeTestBay_2'] = 'false'
+                r['activeTestBay_3'] = 'false'
+                r['activeTestBay_4'] = 'false'
+                r['activeBay_14'] = 'false'
+                r['activeBay_15'] = 'false'
+                r['activeBay_16'] = 'false'
+                r['activeBay_17'] = 'false'
+                r['activeBay_18'] = 'false'
+                r['activeBay_19'] = 'false'
+                r['activeBay_19_sap'] = 'false'
 
-            # Load machine-specific config file and attach as array 'config'
+
+            # Load a machine-specific config file and attach as array 'config'
             try:
                 machine = str(r.get('machine') or '').strip()
                 config_values = []
                 if machine:
                     config_dir = Path('C:/files/config')
-                    # Try standard file name pattern with suffix _00
+                    # Try the standard file name pattern with suffix _00
                     candidates = [config_dir / f"{machine}_00.txt"]
                     target_file = None
                     for p in candidates:
@@ -89,7 +114,7 @@ def main():
                         try:
                             with target_file.open('r', encoding='utf-8', errors='ignore') as f:
                                 raw_lines = [line.strip() for line in f]
-                            # Use ';' as element separator across the whole file
+                            # Use ';' as an element separator across the whole file
                             # 1) Remove empty lines, join with ';' to form a single string
                             joined = ';'.join([ln for ln in raw_lines if ln != ''])
                             # 2) Split by ';', trim tokens, and drop empty tokens
@@ -97,7 +122,7 @@ def main():
                             # 3) Ignore the first 11 values
                             config = tokens[11:] if len(tokens) > 11 else []
                             config_values.append = [{config[i]: config[i + 1]} for i in range(0, len(config), 2)]
-                            # Add second element as {"machine": "xxyyzz"} placeholder based on tokens[1]
+                            # Add the second element as {"machine": "xxyyzz"} placeholder based on tokens[1]
                             if len(tokens) >= 2:
                                 config_values.append = [{"machine": tokens[1]}]
                         except Exception as e:
@@ -112,7 +137,7 @@ def main():
                 r['config'] = []
 
         if records:
-            # Nur Datensätze einfügen, deren 'sequenz' noch nicht in MongoDB existiert (und nicht leer ist)
+            # Nur Datensätze einfügen, deren 'Sequenz' noch nicht in MongoDB existiert (und nicht leer ist)
             # 1) Alle nicht-leeren 'sequenz'-Werte aus den gelesenen Records sammeln
             seq_values = {
                 (r.get('sequenz') or '').strip()
@@ -120,7 +145,7 @@ def main():
                 if isinstance(r.get('sequenz'), str) and r.get('sequenz').strip()
             }
 
-            # 2) Bereits vorhandene 'sequenz' aus Mongo ermitteln (ein Aufruf)
+            # 2) Bereits vorhandene 'Sequenz' aus Mongo ermitteln (ein Aufruf)
             existing_seq = set()
             if seq_values:
                 try:
